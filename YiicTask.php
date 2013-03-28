@@ -153,7 +153,9 @@ class YiicTask extends Task {
     $this->options[] = array();
 
     if (empty($this->dir)) {
-      $this->dir = ".".DIRECTORY_SEPARATOR;
+      $this->dir = realpath(".").DIRECTORY_SEPARATOR;
+    }else{
+      $this->dir = realpath($this->dir).DIRECTORY_SEPARATOR;
     }
 
     $command[] = $this->command;
