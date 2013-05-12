@@ -6,39 +6,41 @@
  */
 require_once "phing/Task.php";
 
-class YiicParam {
+class YiicParam
+{
 
-  private $value;
+  private $_value;
 
   public function addText($str) {
-    $this->value = $str;
+    $this->_value = $str;
   }
 
   public function getValue() {
-    return $this->value;
+    return $this->_value;
   }
 
 }
 
-class YiicOption {
+class YiicOption
+{
 
-  private $name;
-  private $value;
+  private $_name;
+  private $_value;
 
   public function setName($str) {
-    $this->name = $str;
+    $this->_name = $str;
   }
 
   public function getName() {
-    return $this->name;
+    return $this->_name;
   }
 
   public function addText($str) {
-    $this->value = $str;
+    $this->_value = $str;
   }
 
   public function getValue() {
-    return $this->value;
+    return $this->_value;
   }
 
   public function toString() {
@@ -53,39 +55,40 @@ class YiicOption {
 
 }
 
-class YiicTask extends Task {
+class YiicTask extends Task
+{
 
   /**
    * The message passed in the buildfile.
    */
-  private $command = array();
-  private $bin = NULL;
-  private $dir = NULL;
-  private $options = array();
-  private $params = array();
-  private $return_glue = "\n";
-  private $return_property = NULL;
-  private $haltonerror = TRUE;
+  private $_command = array();
+  private $_bin = NULL;
+  private $_dir = NULL;
+  private $_options = array();
+  private $_params = array();
+  private $_returnGlue = "\n";
+  private $_returnProperty = NULL;
+  private $_haltOnError = TRUE;
 
   /**
    * The Yiic command to run.
    */
   public function setCommand($str) {
-    $this->command = $str;
+    $this->_command = $str;
   }
 
   /**
    * Path the Yiic executable.
    */
   public function setBin($str) {
-    $this->bin = $str;
+    $this->_bin = $str;
   }
 
   /**
    * Drupal root directory to use.
    */
   public function setDir($str) {
-    $this->dir = $str;
+    $this->_dir = $str;
   }
 
 
@@ -93,14 +96,14 @@ class YiicTask extends Task {
    * The 'glue' characters used between each line of the returned output.
    */
   public function setReturnGlue($str) {
-    $this->return_glue = (string) $str;
+    $this->_returnGlue = (string) $str;
   }
 
   /**
    * The name of a Phing property to assign the Yiic command's output to.
    */
   public function setReturnProperty($str) {
-    $this->return_property = $str;
+    $this->_returnProperty = $str;
   }
 
   /**
@@ -109,9 +112,9 @@ class YiicTask extends Task {
   public function setHaltonerror($var) {
     if (is_string($var)) {
       $var = strtolower($var);
-      $this->haltonerror = ($var === 'yes' || $var === 'true');
+      $this->_haltOnError = ($var === 'yes' || $var === 'true');
     } else {
-      $this->haltonerror = !!$var;
+      $this->_haltOnError = !!$var;
     }
   }
 
@@ -120,7 +123,7 @@ class YiicTask extends Task {
    */
   public function createParam() {
     $o = new YiicParam();
-    $this->params[] = $o;
+    $this->_params[] = $o;
     return $o;
   }
 
@@ -129,7 +132,7 @@ class YiicTask extends Task {
    */
   public function createOption() {
     $o = new YiicOption();
-    $this->options[] = $o;
+    $this->_options[] = $o;
     return $o;
   }
 
@@ -138,8 +141,8 @@ class YiicTask extends Task {
    */
   public function init() {
     // Get default dir and binary from project.
-    $this->dir = $this->getProject()->getProperty('yiic.dir');
-    $this->bin = $this->getProject()->getProperty('yiic.bin');
+    $this->_dir = $this->getProject()->getProperty('yiic.dir');
+    $this->_bin = $this->getProject()->getProperty('yiic.bin');
   }
 
   /**
@@ -148,28 +151,30 @@ class YiicTask extends Task {
   public function main() {
     $command = array();
 
-    $command[] = !empty($this->bin) ? $this->bin : 'yiic';
+    $command[] = !empty($this->_bin) ? $this->_bin : 'yiic';
 
-    $this->options[] = array();
+    $this->_options[] = array();
 
     if (empty($this->dir)) {
-      $this->dir = realpath(".").DIRECTORY_SEPARATOR;
-    }else{
-      $this->dir = realpath($this->dir).DIRECTORY_SEPARATOR;
+      $this->_dir = realpath(".").DIRECTORY_SEPARATOR;
+    } else {
+      $this->_dir = realpath($this->_dir).DIRECTORY_SEPARATOR;
     }
 
-    $command[] = $this->command;
+    $command[] = $this->_command;
     
-    if ($this->action) {
-      $command[] = $this->action;
+    if ($this->_action) {
+      $command[] = $this->_action;
     }
     
-    foreach ($this->options as $option) {
-      $command[] = $option->toString();
+    foreach ($this->_options as $option) {
+    	if($option instanceof YiicOption)
+    		$command[] = $option->toString();
     }
 
-    foreach ($this->params as $param) {
-      $command[] = $param->getValue();
+    foreach ($this->_params as $param) {
+    	if($option instanceof YiicParam)
+    		$command[] = $param->getValue();
     }
 
     $command = implode(' ', $command);
@@ -177,21 +182,22 @@ class YiicTask extends Task {
     // Execute Yiic.
     $this->log("Executing '$command'...");
     $output = array();
-    exec($this->dir.$command, $output, $return);
+    exec($this->_dir.$command, $output, $return);
     // Collect Yiic output for display through Phing's log.
     foreach ($output as $line) {
       $this->log($line);
     }
     // Set value of the 'pipe' property.
-    if (!empty($this->return_property)) {
-      $this->getProject()->setProperty($this->return_property, implode($this->return_glue, $output));
+    if (!empty($this->_returnProperty)) {
+      $this->getProject()->setProperty(
+          $this->_returnProperty, implode($this->_returnGlue, $output)
+      );
     }
     // Build fail.
-    if ($this->haltonerror && $return != 0) {
+    if ($this->_haltOnError && $return != 0) {
       throw new BuildException("Yiic exited with code $return");
     }
     return $return != 0;
   }
 
 }
-
