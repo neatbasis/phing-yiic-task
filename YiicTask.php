@@ -62,6 +62,7 @@ class YiicTask extends Task
    * The message passed in the buildfile.
    */
   private $_command = array();
+  private $_action = NULL;
   private $_bin = NULL;
   private $_dir = NULL;
   private $_options = array();
@@ -75,6 +76,13 @@ class YiicTask extends Task
    */
   public function setCommand($str) {
     $this->_command = $str;
+  }
+  
+  /**
+   * The action for command.
+   */
+  public function setAction($str) {
+    $this->_action = $str;
   }
 
   /**
@@ -155,7 +163,7 @@ class YiicTask extends Task
 
     $this->_options[] = array();
 
-    if (empty($this->dir)) {
+    if (empty($this->_dir)) {
       $this->_dir = realpath(".").DIRECTORY_SEPARATOR;
     } else {
       $this->_dir = realpath($this->_dir).DIRECTORY_SEPARATOR;
